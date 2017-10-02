@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+  </head>
+  <body>
+    <% include ./partials/header %>
+    <div class="container">
+      <h2>Add New Contact</h2>
+      <form action="/contacts/edit/<%= data.id %>" method="post">
+        <table class="table">
+          <input type="hidden" name="id" value="<%= data.id %>">
+          <tr>
+            <td>Name</td>
+            <td>:</td>
+            <td><input type="text" name="name" value="<%= data.name %>"></td>
+          </tr>
+          <tr>
+            <td>Company</td>
+            <td>:</td>
+            <td><input type="text" name="company" value="<%= data.company %>"></td>
+          </tr>
+          <tr>
+            <td>Phone</td>
+            <td>:</td>
+            <td><input type="text" name="telp_number" value="<%= data.telp_number %>"></br></td>
+          </tr>
+          <tr>
+            <td>Email</td>
+            <td>:</td>
+            <td><input type="text" name="email" value="<%= data.email %>"></br></td>
+          </tr>
+          <tr>
+            <td colspan="3"><input type="submit" name="submit" value="Update"></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <% include ./partials/footer %>
+  </body>
+</html>

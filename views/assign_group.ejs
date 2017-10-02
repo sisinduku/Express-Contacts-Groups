@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+  </head>
+  <body>
+    <% include ./partials/header %>
+    <div class="container">
+      <h2>Add New Group</h2>
+      <h3><%= data.name_of_group %></h3>
+      <form action="/groups/assign/<%= data.id %>" method="post">
+        <table class="table">
+          <input type="hidden" name="id" value="<%= data.id %>">
+          <tr>
+            <td>Name</td>
+            <td>:</td>
+            <td>
+              <select name="contact">
+                <option disabled>Select Contact Name</option>
+                <% for (let i = 0; i < contactData.length; i++) { %>
+                  <option value="<%= contactData[i].id %>"><%= contactData[i].name %></option>
+                <%}%>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3"><input type="submit" name="submit" value="Update"></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <% include ./partials/footer %>
+  </body>
+</html>

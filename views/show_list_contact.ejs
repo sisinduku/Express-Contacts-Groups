@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+  </head>
+  <body>
+    <% include ./partials/header %>
+    <div class="container">
+      <table id='contact' class="display" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Company</th>
+            <th>Phone Number</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (data.length > 0) { %>
+            <% for (let i = 0; i < data.length; i++) { %>
+            <tr>
+              <td><%= data[i].id %></td>
+              <td><%= data[i].name %></td>
+              <td><%= data[i].company %></td>
+              <td><%= data[i].telp_number %></td>
+              <td><%= data[i].email %></td>
+              <td>
+                <a href="contacts/address/<%= data[i].id %>">Address</a> |
+                <a href="contacts/edit/<%= data[i].id %>">Edit</a> |
+                <a onclick="return confirm('Are you sure?')" href="contacts/delete/<%= data[i].id %>">Delete</a>
+              </td>
+            </tr>
+            <% } %>
+          <% } else { %>
+            <tr>
+              <td colspan="3">No Record Available</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+      <br>
+      <h2>Add New Contact</h2>
+      <form action="/contacts" method="post">
+        <table class="table">
+          <tr>
+            <td>Name</td>
+            <td>:</td>
+            <td><input type="text" name="name" value=""></td>
+          </tr>
+          <tr>
+            <td>Company</td>
+            <td>:</td>
+            <td><input type="text" name="company" value=""></td>
+          </tr>
+          <tr>
+            <td>Phone</td>
+            <td>:</td>
+            <td><input type="text" name="telp_number" value=""></br></td>
+          </tr>
+          <tr>
+            <td>Email</td>
+            <td>:</td>
+            <td><input type="text" name="email" value=""></br></td>
+          </tr>
+          <tr>
+            <td colspan="3"><input type="submit" name="submit" value="Submit"></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <% include ./partials/footer %>
+    <script>
+      $(document).ready(function(){
+          $('#contact').DataTable();
+      });
+    </script>
+  </body>
+</html>

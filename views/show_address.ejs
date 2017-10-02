@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+  </head>
+  <body>
+    <% include ./partials/header %>
+    <div class="container">
+      <h2>Add New Address</h2>
+      <form action="/addresses/edit/<%= data.id %>" method="post">
+        <table class="table">
+          <input type="hidden" name="id" value="<%= data.id %>">
+          <tr>
+            <td>Street</td>
+            <td>:</td>
+            <td><input type="text" name="street" value="<%= data.street %>"></td>
+          </tr>
+          <tr>
+            <td>City</td>
+            <td>:</td>
+            <td><input type="text" name="city" value="<%= data.city %>"></td>
+          </tr>
+          <tr>
+            <td>Zipcode</td>
+            <td>:</td>
+            <td><input type="text" name="zipcode" value="<%= data.zipcode %>"></td>
+          </tr>
+          <tr>
+            <td>Contact Name</td>
+            <td>:</td>
+            <td>
+              <select name="contact" required>
+                <option disabled>Select Contact Name</option>
+                <% for (let i = 0; i < contactData.length; i++) { %>
+                  <% if (data.contact_id == contactData[i].id) { %>
+                    <option value="<%= contactData[i].id %>" selected=true><%= contactData[i].name %></option>
+                  <% } else { %>
+                    <option value="<%= contactData[i].id %>"><%= contactData[i].name %></option>
+                  <% } %>
+                <%}%>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3"><input type="submit" name="submit" value="Update"></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <% include ./partials/footer %>
+  </body>
+</html>
