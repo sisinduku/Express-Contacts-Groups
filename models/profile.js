@@ -2,33 +2,43 @@ var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('data.db');
 
 class Profile {
-  getProfiles() {
+  constructor(param) {
+    this.id = param.id;
+    this.username = param.username;
+    this.password = param.password;
+    this.contact_id = param.contact_id;
+  }
+
+  static getProfiles() {
     return new Promise((resolve, reject) => {
       let selectQuery = 'SELECT * FROM profiles';
       db.all(selectQuery, (err, rows) => {
-        if (!err)
-          resolve(rows);
-        else
+        if (!err) {
+          let result = rows.map(rowProfile => {
+            return new Profile(rowProfile);
+          });
+          resolve(result);
+        } else
           reject(err);
       });
     });
   }
 
-  getProfile(param) {
+  static getProfile(param) {
     return new Promise((resolve, reject) => {
       let selectQuery = 'SELECT * FROM profiles WHERE id = $id';
       db.get(selectQuery, {
         $id: param.profileId,
       }, (err, row) => {
-        if (!err)
-          resolve(row);
-        else
+        if (!err) {
+          resolve(new Profile(row));
+        } else
           reject(err);
       });
     });
   }
 
-  postProfile(postData) {
+  static postProfile(postData) {
     let insertQuery = "INSERT INTO profiles (username, password, contact_id) VALUES (?, ?, ?)";
     return new Promise((resolve, reject) => {
       db.run(insertQuery, [postData.username, postData.password, postData.contact], (err) => {
@@ -40,14 +50,14 @@ class Profile {
     });
   }
 
-  editProfile(postData) {
+  static editProfile(postData) {
     let updateQuery = "UPDATE profiles SET username = $username, password = $password, " +
       "contact_id = $contact WHERE id = $id";
     return new Promise((resolve, reject) => {
       db.run(updateQuery, {
         $username: postData.username,
         $password: postData.password,
-        $contact_id: postData.contact,
+        $contact: postData.contact,
         $id: postData.id,
       }, err => {
         if (!err)
@@ -58,7 +68,7 @@ class Profile {
     });
   }
 
-  deleteProfile(param) {
+  static deleteProfile(param) {
     let deleteQuery = "DELETE FROM profiles WHERE id = $id";
     return new Promise((resolve, reject) => {
       db.run(deleteQuery, {

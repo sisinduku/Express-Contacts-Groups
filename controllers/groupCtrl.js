@@ -1,18 +1,15 @@
 const Group = require('../models/group');
 const ContactGroup = require('../models/contactGroup');
 const Contact = require('../models/contact');
-const group = new Group();
-const contactGroup = new ContactGroup();
-const contact = new Contact();
 
 class GroupCtrl {
   static getGroups(req, res) {
-    group.getGroups().then((rows) => {
+    Group.getGroups().then((rows) => {
       let groups = rows.reduce((result, element) => {
         result.push(element.id);
         return result;
       }, []);
-      contactGroup.getContactGroupByGroupId(groups).then(contactGroups => {
+      ContactGroup.getContactGroupByGroupId(groups).then(contactGroups => {
         let contactIdsJoined = rows.map((element) => {
           element['contact_id'] = [];
           contactGroups.forEach(value => {
@@ -22,7 +19,7 @@ class GroupCtrl {
           });
           return element;
         });
-        contact.getContacts().then((contacts) => {
+        Contact.getContacts().then((contacts) => {
           let data = contactIdsJoined.map((list) => {
             list['contact'] = [];
             list.contact_id.forEach(listValue => {
@@ -37,6 +34,7 @@ class GroupCtrl {
           res.render('show_list_group', {
             title: 'Show Groups',
             data: data,
+            page: 'group-nav',
           });
         });
       });
@@ -46,10 +44,11 @@ class GroupCtrl {
   }
 
   static getGroup(req, res) {
-    group.getGroup(req.params).then((row) => {
+    Group.getGroup(req.params).then((row) => {
       res.render('show_group', {
         title: 'Show Group',
         data: row,
+        page: 'group-nav',
       });
     }).catch((reason) => {
       console.log(reason);
@@ -57,7 +56,7 @@ class GroupCtrl {
   }
 
   static postGroup(req, res) {
-    group.postGroup(req.body).then((val) => {
+    Group.postGroup(req.body).then((val) => {
       res.redirect('/groups');
     }).catch(reason => {
       console.log(reason);
@@ -65,7 +64,7 @@ class GroupCtrl {
   }
 
   static editGroup(req, res) {
-    group.editGroup(req.body).then((val) => {
+    Group.editGroup(req.body).then((val) => {
       res.redirect('/groups');
     }).catch(reason => {
       console.log(reason);
@@ -73,12 +72,13 @@ class GroupCtrl {
   }
 
   static assignGroupForm(req, res) {
-    group.getGroup(req.params).then((row) => {
-      contact.getContacts().then((rows) => {
+    Group.getGroup(req.params).then((row) => {
+      Contact.getContacts().then((rows) => {
         res.render('assign_group', {
           title: 'Assign Group',
           data: row,
           contactData: rows,
+          page: 'group-nav',
         });
       });
     }).catch((reason) => {
@@ -88,7 +88,7 @@ class GroupCtrl {
 
   static assignGroup(req, res) {
     req.body['group_id'] = req.params.groupId;
-    contactGroup.postContactGroup(req.body).then((val) => {
+    ContactGroup.postContactGroup(req.body).then((val) => {
       res.redirect('/groups');
     }).catch(reason => {
       console.log(reason);
@@ -96,7 +96,7 @@ class GroupCtrl {
   }
 
   static deleteGroup(req, res) {
-    group.deleteGroup(req.params).then((val) => {
+    Group.deleteGroup(req.params).then((val) => {
       res.redirect('/groups');
     }).catch(reason => {
       console.log(reason);

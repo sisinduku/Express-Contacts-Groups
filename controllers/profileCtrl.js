@@ -1,16 +1,14 @@
 const Profile = require('../models/profile');
 const Contact = require('../models/contact');
-const profile = new Profile();
-const contact = new Contact();
 
 class ProfileCtrl {
   static getProfiles(req, res, err = null) {
-    profile.getProfiles().then((rows) => {
+    Profile.getProfiles().then((rows) => {
       let contacts = rows.reduce((result, element) => {
         result.push(element.contact_id);
         return result;
       }, []);
-      contact.getContactRows(contacts).then((rowsContact) => {
+      Contact.getContactRows(contacts).then((rowsContact) => {
         let contactJoined = rows.map((element) => {
           rowsContact.forEach(value => {
             if (element.contact_id == value.id)
@@ -18,12 +16,13 @@ class ProfileCtrl {
           });
           return element;
         });
-        contact.getContacts().then((allContacts) => {
+        Contact.getContacts().then((allContacts) => {
           res.render('show_list_profile', {
             title: 'Show profiles',
             data: contactJoined,
             contactData: allContacts,
             err: err,
+            page: 'group-nav',
           });
         }).catch((reason) => {
           console.log(reason);
@@ -37,17 +36,18 @@ class ProfileCtrl {
   }
 
   static getProfile(req, res) {
-    profile.getProfile(req.params).then((row) => {
-      contact.getContactRows([row.contact_id]).then((rowContact) => {
+    Profile.getProfile(req.params).then((row) => {
+      Contact.getContactRows([row.contact_id]).then((rowContact) => {
         if (rowContact.length > 0)
           row['contact_name'] = rowContact[0].name;
         else
           row['contact_name'] = "";
-        contact.getContacts().then((allContacts) => {
+        Contact.getContacts().then((allContacts) => {
           res.render('show_profile', {
-            title: 'Show profile',
+            title: 'Show Profile',
             data: row,
             contactData: allContacts,
+            page: 'group-nav',
           });
         }).catch((reason) => {
           console.log(reason);
@@ -61,7 +61,7 @@ class ProfileCtrl {
   }
 
   static postProfile(req, res) {
-    profile.postProfile(req.body).then((val) => {
+    Profile.postProfile(req.body).then((val) => {
       res.redirect('/profiles');
     }).catch(reason => {
       this.getProfiles(req, res, reason);
@@ -69,7 +69,7 @@ class ProfileCtrl {
   }
 
   static editProfile(req, res) {
-    profile.editProfile(req.body).then((val) => {
+    Profile.editProfile(req.body).then((val) => {
       res.redirect('/profiles');
     }).catch(reason => {
       console.log(reason);
@@ -77,7 +77,7 @@ class ProfileCtrl {
   }
 
   static deleteProfile(req, res) {
-    profile.deleteProfile(req.params).then((val) => {
+    Profile.deleteProfile(req.params).then((val) => {
       res.redirect('/profiles');
     }).catch(reason => {
       console.log(reason);

@@ -2,19 +2,30 @@ var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('data.db');
 
 class Contact {
-  getContacts() {
+  constructor(param) {
+    this.id = param.id;
+    this.name = param.name;
+    this.company = param.company;
+    this.telp_number = param.telp_number;
+    this.email = param.email;
+  }
+
+  static getContacts() {
     return new Promise((resolve, reject) => {
       let selectQuery = 'SELECT * FROM contacts';
       db.all(selectQuery, (err, rows) => {
-        if (!err)
-          resolve(rows);
-        else
+        if (!err) {
+          let result = rows.map(rowContact => {
+            return new Contact(rowContact);
+          });
+          resolve(result);
+        } else
           reject(err);
       });
     });
   }
 
-  getContactRows(param) {
+  static getContactRows(param) {
     return new Promise((resolve, reject) => {
       let selectQuery = 'SELECT * FROM contacts WHERE id IN (';
       param.forEach((element, index) => {
@@ -26,43 +37,46 @@ class Contact {
       selectQuery += ')';
       db.all(selectQuery, (err, rows) => {
         if (!err) {
-          resolve(rows);
+          let result = rows.map(rowContact => {
+            return new Contact(rowContact);
+          });
+          resolve(result);
         } else
           reject(err);
       });
     });
   }
 
-  getContact(param) {
+  static getContact(param) {
     return new Promise((resolve, reject) => {
       let selectQuery = 'SELECT * FROM contacts WHERE id = $id';
       db.get(selectQuery, {
         $id: param.contactId,
       }, (err, row) => {
         if (!err)
-          resolve(row);
+          resolve(new Contact(row));
         else
           reject(err);
       });
     });
   }
 
-  postContact(postData) {
+  static postContact(postData) {
     let insertQuery = "INSERT INTO contacts (name, company, telp_number," +
       "email) VALUES (?, ?, ?, ?)";
     return new Promise((resolve, reject) => {
       db.run(insertQuery, [postData.name, postData.company, postData.telp_number,
         postData.email
-      ], (err) => {
+      ], function(err) {
         if (!err)
-          resolve(insertQuery);
+          resolve(this.lastID);
         else
           reject(err);
       });
     });
   }
 
-  editContact(postData) {
+  static editContact(postData) {
     let updateQuery = "UPDATE contacts SET name = $name, company = $company, " +
       "telp_number = $telp_number, email = $email WHERE id = $id";
     return new Promise((resolve, reject) => {
@@ -81,7 +95,7 @@ class Contact {
     });
   }
 
-  deleteContact(param) {
+  static deleteContact(param) {
     let deleteQuery = "DELETE FROM contacts WHERE id = $id";
     return new Promise((resolve, reject) => {
       db.run(deleteQuery, {

@@ -1,16 +1,14 @@
 const Address = require('../models/address');
 const Contact = require('../models/contact');
-const address = new Address();
-const contact = new Contact();
 
 class AddressCtrl {
   static getAddresses(req, res, err = null) {
-    address.getAddresses().then((rows) => {
+    Address.getAddresses().then((rows) => {
       let contacts = rows.reduce((result, element) => {
         result.push(element.contact_id);
         return result;
       }, []);
-      contact.getContactRows(contacts).then((rowsContact) => {
+      Contact.getContactRows(contacts).then((rowsContact) => {
         let contactJoined = rows.map((element) => {
           rowsContact.forEach(value => {
             if (element.contact_id == value.id)
@@ -18,10 +16,11 @@ class AddressCtrl {
           });
           return element;
         });
-        contact.getContacts().then((allContacts) => {
+        Contact.getContacts().then((allContacts) => {
           res.render('show_list_address', {
             title: 'Show addresses',
             data: contactJoined,
+            page: 'address-nav',
             contactData: allContacts,
             err: err,
           });
@@ -37,16 +36,17 @@ class AddressCtrl {
   }
 
   static getAddress(req, res) {
-    address.getAddress(req.params).then((row) => {
-      contact.getContactRows([row.contact_id]).then((rowContact) => {
+    Address.getAddress(req.params).then((row) => {
+      Contact.getContactRows([row.contact_id]).then((rowContact) => {
         if (rowContact.length > 0)
           row['contact_name'] = rowContact[0].name;
         else
           row['contact_name'] = "";
-        contact.getContacts().then((allContacts) => {
+        Contact.getContacts().then((allContacts) => {
           res.render('show_address', {
-            title: 'Show address',
+            title: 'Show Address',
             data: row,
+            page: 'address-nav',
             contactData: allContacts,
           });
         }).catch((reason) => {
@@ -61,7 +61,7 @@ class AddressCtrl {
   }
 
   static postAddress(req, res) {
-    address.postAddress(req.body).then((val) => {
+    Address.postAddress(req.body).then((val) => {
       res.redirect('/addresses');
     }).catch(reason => {
       console.log(reason);
@@ -69,7 +69,7 @@ class AddressCtrl {
   }
 
   static editAddress(req, res) {
-    address.editAddress(req.body).then((val) => {
+    Address.editAddress(req.body).then((val) => {
       res.redirect('/addresses');
     }).catch(reason => {
       console.log(reason);
@@ -77,7 +77,7 @@ class AddressCtrl {
   }
 
   static deleteAddress(req, res) {
-    address.deleteAddress(req.params).then((val) => {
+    Address.deleteAddress(req.params).then((val) => {
       res.redirect('/addresses');
     }).catch(reason => {
       console.log(reason);

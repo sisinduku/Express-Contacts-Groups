@@ -2,19 +2,27 @@ var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('data.db');
 
 class Group {
-  getGroups() {
+  constructor(param) {
+    this.id = param.id;
+    this.name_of_group = param.name_of_group;
+  }
+
+  static getGroups() {
     return new Promise((resolve, reject) => {
       let selectQuery = 'SELECT * FROM groups';
       db.all(selectQuery, (err, rows) => {
-        if (!err)
-          resolve(rows);
-        else
+        if (!err) {
+          let result = rows.map(rowGroup => {
+            return new Group(rowGroup);
+          });
+          resolve(result);
+        } else
           reject(err);
       });
     });
   }
 
-  getGroupRows(param) {
+  static getGroupRows(param) {
     return new Promise((resolve, reject) => {
       let selectQuery = 'SELECT * FROM groups WHERE id IN (';
       param.forEach((element, index) => {
@@ -26,28 +34,31 @@ class Group {
       selectQuery += ')';
       db.all(selectQuery, (err, rows) => {
         if (!err) {
-          resolve(rows);
+          let result = rows.map(rowGroup => {
+            return new Group(rowGroup);
+          });
+          resolve(result);
         } else
           reject(err);
       });
     });
   }
 
-  getGroup(param) {
+  static getGroup(param) {
     return new Promise((resolve, reject) => {
       let selectQuery = 'SELECT * FROM groups WHERE id = $id';
       db.get(selectQuery, {
         $id: param.groupId,
       }, (err, row) => {
         if (!err)
-          resolve(row);
+          resolve(new Group(row));
         else
           reject(err);
       });
     });
   }
 
-  postGroup(postData) {
+  static postGroup(postData) {
     let insertQuery = "INSERT INTO groups (name_of_group) VALUES (?)";
     return new Promise((resolve, reject) => {
       db.run(insertQuery, [postData.name_of_group], (err) => {
@@ -59,7 +70,7 @@ class Group {
     });
   }
 
-  editGroup(postData) {
+  static editGroup(postData) {
     let updateQuery = "UPDATE groups SET name_of_group = $name_of_group WHERE id = $id";
     return new Promise((resolve, reject) => {
       db.run(updateQuery, {
@@ -74,7 +85,7 @@ class Group {
     });
   }
 
-  deleteGroup(param) {
+  static deleteGroup(param) {
     let deleteQuery = "DELETE FROM groups WHERE id = $id";
     return new Promise((resolve, reject) => {
       db.run(deleteQuery, {
