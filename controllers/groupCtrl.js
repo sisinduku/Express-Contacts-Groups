@@ -4,43 +4,56 @@ const Contact = require('../models/contact');
 
 class GroupCtrl {
   static getGroups(req, res) {
-    Group.getGroups().then((rows) => {
-      let groups = rows.reduce((result, element) => {
-        result.push(element.id);
-        return result;
-      }, []);
-      ContactGroup.getContactGroupByGroupId(groups).then(contactGroups => {
-        let contactIdsJoined = rows.map((element) => {
-          element['contact_id'] = [];
-          contactGroups.forEach(value => {
-            if (element.id == value.group_id) {
-              element['contact_id'].push(value.contact_id);
-            }
-          });
-          return element;
-        });
-        Contact.getContacts().then((contacts) => {
-          let data = contactIdsJoined.map((list) => {
-            list['contact'] = [];
-            list.contact_id.forEach(listValue => {
-              contacts.forEach(contactValue => {
-                if (listValue == contactValue.id) {
-                  list['contact'].push(contactValue);
+    Group.getGroups()
+      .then((rows) => {
+        let groups = rows.reduce((result, element) => {
+          result.push(element.id);
+          return result;
+        }, []);
+        return {
+          rows: rows,
+          groups: groups
+        };
+      })
+      .then(values => {
+        Promise.all([
+            ContactGroup.getContactGroupByGroupId(values.groups),
+            Contact.getContacts(),
+          ])
+          .then(valuesAll => {
+            let contactIdsJoined = values.rows.map((element) => {
+              element['contact_id'] = [];
+              valuesAll[0].forEach(value => {
+                if (element.id == value.group_id) {
+                  element['contact_id'].push(value.contact_id);
                 }
               });
+              return element;
             });
-            return list;
-          });
-          res.render('show_list_group', {
-            title: 'Show Groups',
-            data: data,
-            page: 'group-nav',
-          });
-        });
+            let data = contactIdsJoined.map((list) => {
+              list['contact'] = [];
+              list.contact_id.forEach(listValue => {
+                valuesAll[1].forEach(contactValue => {
+                  if (listValue == contactValue.id) {
+                    list['contact'].push(contactValue);
+                  }
+                });
+              });
+              return list;
+            });
+            res.render('show_list_group', {
+              title: 'Show Groups',
+              data: data,
+              page: 'group-nav',
+            });
+          })
+          .catch(reason => {
+            console.log(reason);
+          })
+      })
+      .catch((reason) => {
+        console.log(reason);
       });
-    }).catch((reason) => {
-      console.log(reason);
-    });
   }
 
   static getGroup(req, res) {
@@ -72,18 +85,21 @@ class GroupCtrl {
   }
 
   static assignGroupForm(req, res) {
-    Group.getGroup(req.params).then((row) => {
-      Contact.getContacts().then((rows) => {
+    Promise.all([
+        Group.getGroup(req.params),
+        Contact.getContacts()
+      ])
+      .then(values => {
         res.render('assign_group', {
           title: 'Assign Group',
-          data: row,
-          contactData: rows,
+          data: values[0],
+          contactData: values[1],
           page: 'group-nav',
         });
+      })
+      .catch((reason) => {
+        console.log(reason);
       });
-    }).catch((reason) => {
-      console.log(reason);
-    });
   }
 
   static assignGroup(req, res) {
